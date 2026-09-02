@@ -1,9 +1,11 @@
-﻿build/
+﻿# RT .gitignore
+build/
 dist/
 __pycache__/
 *.py[cod]
 *.exe
 *.log
+*.spec
 .vscode/
 .DS_Store
 Thumbs.db
