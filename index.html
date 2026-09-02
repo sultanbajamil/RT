@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity Remote Desktop</title>
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121e;
+            --glass-bg: rgba(18, 18, 30, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary-glow: #6366f1;
+            --secondary-glow: #a855f7;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --accent: #4f46e5;
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
+        }
+
+        h1, h2, h3, .font-outfit {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Glassmorphism Common Styles */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* --- Landing Panel --- */
+        #landing-panel {
+            width: 100%;
+            max-width: 480px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            animation: fadeIn 0.6s ease-out;
+            z-index: 10;
+        }
+
+        .logo-area {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+            margin-bottom: 8px;
+        }
+
+        .logo-area h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(to right, #fff, var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-area p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 15px;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--primary-glow);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .row-inputs {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+        }
+
+        .btn-connect {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary-glow));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-connect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .btn-connect:active {
+            transform: translateY(0);
+        }
+
+        .btn-connect:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* --- Viewer Panel (Fullscreen layout) --- */
+        #viewer-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #020205;
+            z-index: 100;
+            flex-direction: column;
+        }
+
+        /* --- Header / Status Bar --- */
+        .viewer-header {
+            height: 48px;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 110;
+        }
+
+        .status-indicators {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 13px;
+        }
+
+        .indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+
+        .indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--text-secondary);
+        }
+
+        .indicator-dot.connected {
+            background-color: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .indicator-dot.connecting {
+            background-color: #f59e0b;
+            box-shadow: 0 0 8px #f59e0b;
+            animation: pulse 1s infinite alternate;
+        }
+
+        .quick-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary-glow);
+        }
+
+        .header-btn.danger {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .header-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger);
+        }
+
+        /* --- Canvas Container --- */
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            position: relative;
+            padding: 10px;
+        }
+
+        #remote-canvas {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            cursor: none; /* Hide default cursor since we render remote cursor position */
+            border-radius: 8px;
+            background-color: #000;
+        }
+
+        /* --- Sliding Settings Panel --- */
+        #settings-sidebar {
+            position: fixed;
+            top: 48px;
+            right: -320px;
+            width: 320px;
+            height: calc(100vh - 48px);
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid var(--glass-border);
+            z-index: 105;
+            padding: 30px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        #settings-sidebar.open {
+            right: 0;
+        }
+
+        .sidebar-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sidebar-section h3 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 6px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .setting-control {
+            width: 100%;
+            margin-top: 6px;
+        }
+
+        .setting-row label {
+            color: var(--text-primary);
+        }
+
+        /* Toggle Switches */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-glow);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--primary-glow);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -5px;
+            box-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        select.custom-select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text-primary);
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* --- Audio Visualizer / Active Bar --- */
+        .audio-wave {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            height: 16px;
+        }
+
+        .wave-bar {
+            width: 2px;
+            height: 100%;
+            background-color: var(--success);
+            animation: quiet 1.2s ease-in-out infinite alternate;
+            transform-origin: bottom;
+        }
+
+        .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+
+        .audio-wave.active .wave-bar {
+            animation: sound 0.5s ease-in-out infinite alternate;
+        }
+
+        /* --- Key Combo Quick Send Bar --- */
+        .bottom-action-bar {
+            height: 40px;
+            background: rgba(10, 10, 15, 0.9);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            z-index: 102;
+        }
+
+        .bottom-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            padding: 4px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .bottom-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary-glow);
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border-left-color: white;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        /* Custom notifications modal */
+        #notification-box {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(239, 68, 68, 0.9);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 14px;
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+            z-index: 999;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #notification-box.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 0.6; }
+            to { transform: scale(1.1); opacity: 1; }
+        }
+
+        @keyframes quiet {
+            25% { transform: scaleY(0.3); }
+            50% { transform: scaleY(0.1); }
+            75% { transform: scaleY(0.4); }
+            100% { transform: scaleY(0.2); }
+        }
+
+        @keyframes sound {
+            0% { transform: scaleY(0.2); }
+            25% { transform: scaleY(0.6); }
+            50% { transform: scaleY(0.3); }
+            75% { transform: scaleY(1.0); }
+            100% { transform: scaleY(0.5); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Landing Panel -->
+    <div id="landing-panel" class="glass-card">
+        <div class="logo-area">
+            <div class="logo-icon">RT</div>
+            <h1>Antigravity Remote</h1>
+            <p>Control office machine securely on port 3350</p>
+        </div>
+
+        <div class="input-group">
+            <label for="target-ip">Target Computer IP Address</label>
+            <div class="input-wrapper">
+                <input type="text" id="target-ip" placeholder="e.g. 192.168.1.10 or localhost">
+            </div>
+        </div>
+
+        <div class="row-inputs">
+            <div class="input-group">
+                <label for="passcode">Security Passcode</label>
+                <div class="input-wrapper">
+                    <input type="password" id="passcode" value="3350">
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="target-port">Port</label>
+                <div class="input-wrapper">
+                    <input type="text" id="target-port" value="3350" readonly>
+                </div>
+            </div>
+        </div>
+
+        <button id="btn-connect" class="btn-connect" onclick="connectRemote()">
+            <span>Connect Control</span>
+            <div id="connect-spinner" class="spinner"></div>
+        </button>
+    </div>
+
+    <!-- Viewer Panel -->
+    <div id="viewer-panel">
+        <div class="viewer-header">
+            <div class="status-indicators">
+                <div class="indicator">
+                    <div id="status-dot" class="indicator-dot"></div>
+                    <span id="status-text">Disconnected</span>
+                </div>
+                <div class="indicator">
+                    <span>Latency:</span>
+                    <strong id="latency-text">--ms</strong>
+                </div>
+                <div class="indicator">
+                    <span>Audio:</span>
+                    <div id="audio-wave-anim" class="audio-wave">
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-controls">
+                <button class="header-btn" onclick="sendQuickKey('win')">
+                    Windows Menu
+                </button>
+                <button class="header-btn" onclick="sendQuickKey('ctrl-alt-del')">
+                    Ctrl+Alt+Del
+                </button>
+                <button class="header-btn" onclick="toggleSettings()">
+                    Settings
+                </button>
+                <button class="header-btn danger" onclick="disconnectRemote()">
+                    Disconnect
+                </button>
+            </div>
+        </div>
+
+        <div class="canvas-container" id="canvas-container">
+            <canvas id="remote-canvas"></canvas>
+        </div>
+
+        <div class="bottom-action-bar">
+            <button class="bottom-btn" onclick="sendQuickKey('alt-tab')">Send Alt+Tab</button>
+            <button class="bottom-btn" onclick="sendQuickKey('esc')">Send Esc</button>
+            <button class="bottom-btn" onclick="sendQuickKey('win-d')">Show Desktop (Win+D)</button>
+            <button class="bottom-btn" onclick="toggleFullscreen()">Toggle Fullscreen</button>
+        </div>
+    </div>
+
+    <!-- Sliding Settings Sidebar -->
+    <div id="settings-sidebar">
+        <div class="sidebar-section">
+            <h3>Video Settings</h3>
+            
+            <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                <label>Stream Resolution Scale (<span id="val-scale">1.0</span>x)</label>
+                <input type="range" id="setting-scale" min="0.4" max="1.2" step="0.1" value="1.0" class="setting-control" oninput="updateSettingsDisplay()">
+            </div>
+
+            <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                <label>JPEG Quality (<span id="val-quality">60</span>%)</label>
+                <input type="range" id="setting-quality" min="20" max="100" step="5" value="60" class="setting-control" oninput="updateSettingsDisplay()">
+            </div>
+
+            <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                <label>Target FPS</label>
+                <select id="setting-fps" class="custom-select setting-control" onchange="applyStreamSettings()">
+                    <option value="15">15 FPS</option>
+                    <option value="30" selected>30 FPS</option>
+                    <option value="60">60 FPS</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <h3>Audio Settings</h3>
+            <div class="setting-row">
+                <label for="setting-audio">Enable Loopback Audio</label>
+                <label class="switch">
+                    <input type="checkbox" id="setting-audio" checked onchange="applyStreamSettings()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="sidebar-section" style="margin-top: auto;">
+            <button class="btn-connect" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); box-shadow: none;" onclick="toggleSettings()">
+                Close Settings
+            </button>
+        </div>
+    </div>
+
+    <!-- Error Notification Box -->
+    <div id="notification-box">
+        <span id="notification-msg">Connection Error!</span>
+    </div>
+
+    <script>
+        // Setup initial default IP value to current browser host
+        document.getElementById('target-ip').value = window.location.hostname || 'localhost';
+
+        let ws = null;
+        let isConnected = false;
+        let pcmPlayer = null;
+        let screenWidth = 1920;
+        let screenHeight = 1080;
+        let canvas = document.getElementById('remote-canvas');
+        let ctx = canvas.getContext('2d');
+        let pingInterval = null;
+        let pingStartTime = 0;
+
+        // Custom Notification Handler
+        function showError(msg) {
+            const box = document.getElementById('notification-box');
+            document.getElementById('notification-msg').innerText = msg;
+            box.classList.add('show');
+            setTimeout(() => {
+                box.classList.remove('show');
+            }, 4000);
+        }
+
+        // Settings sidebar controls
+        function toggleSettings() {
+            document.getElementById('settings-sidebar').classList.toggle('open');
+        }
+
+        function updateSettingsDisplay() {
+            document.getElementById('val-scale').innerText = document.getElementById('setting-scale').value;
+            document.getElementById('val-quality').innerText = document.getElementById('setting-quality').value;
+            applyStreamSettings();
+        }
+
+        // Web Audio PCM Player for Live Audio Feed
+        class AudioPCMStreamPlayer {
+            constructor(channels, sampleRate) {
+                this.channels = channels || 2;
+                this.sampleRate = sampleRate || 48000;
+                this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                this.nextPlayTime = 0;
+                
+                // Audio status light animation controller
+                this.visualizer = document.getElementById('audio-wave-anim');
+            }
+
+            play(arrayBuffer) {
+                if (this.audioCtx.state === 'suspended') {
+                    this.audioCtx.resume();
+                }
+
+                // Input is 16-bit signed integer PCM data
+                const int16Data = new Int16Array(arrayBuffer);
+                const totalSamples = int16Data.length;
+                const frameCount = totalSamples / this.channels;
+
+                if (frameCount <= 0) return;
+
+                // Create Float32 audio buffer for Web Audio
+                const audioBuffer = this.audioCtx.createBuffer(this.channels, frameCount, this.sampleRate);
+                
+                // Extract channels
+                const channelsData = [];
+                for (let c = 0; c < this.channels; c++) {
+                    channelsData.push(audioBuffer.getChannelData(c));
+                }
+
+                // De-interleave and convert Int16 to Float32 [-1.0, 1.0]
+                for (let i = 0; i < frameCount; i++) {
+                    for (let c = 0; c < this.channels; c++) {
+                        channelsData[c][i] = int16Data[i * this.channels + c] / 32768.0;
+                    }
+                }
+
+                // Create buffer node
+                const source = this.audioCtx.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(this.audioCtx.destination);
+
+                // Schedule node play time (avoid gaps)
+                let currentTime = this.audioCtx.currentTime;
+                if (this.nextPlayTime < currentTime) {
+                    this.nextPlayTime = currentTime + 0.06; // small buffer to absorb network jitter
+                }
+
+                source.start(this.nextPlayTime);
+                this.nextPlayTime += audioBuffer.duration;
+
+                // Visualizer effect
+                this.visualizer.classList.add('active');
+                if (this.visTimeout) clearTimeout(this.visTimeout);
+                this.visTimeout = setTimeout(() => {
+                    this.visualizer.classList.remove('active');
+                }, 200);
+            }
+
+            close() {
+                if (this.audioCtx) {
+                    this.audioCtx.close();
+                }
+            }
+        }
+
+        // Connect to Remote Host
+        function connectRemote() {
+            const ip = document.getElementById('target-ip').value.trim();
+            const port = document.getElementById('target-port').value.trim();
+            const passcode = document.getElementById('passcode').value.trim();
+
+            if (!ip) {
+                showError("Please enter a valid IP address.");
+                return;
+            }
+
+            // Disable connect buttons
+            document.getElementById('btn-connect').disabled = true;
+            document.getElementById('connect-spinner').style.display = 'block';
+            
+            const statusDot = document.getElementById('status-dot');
+            statusDot.className = "indicator-dot connecting";
+            document.getElementById('status-text').innerText = "Connecting...";
+
+            // Establish WebSocket connection
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${ip}:${port}/ws?passcode=${encodeURIComponent(passcode)}`;
+            
+            console.log("Connecting to WebSocket:", wsUrl);
+            ws = new WebSocket(wsUrl);
+            ws.binaryType = "arraybuffer";
+
+            ws.onopen = function() {
+                isConnected = true;
+                document.getElementById('landing-panel').style.display = 'none';
+                document.getElementById('viewer-panel').style.display = 'flex';
+                statusDot.className = "indicator-dot connected";
+                document.getElementById('status-text').innerText = "Connected";
+                
+                // Initialize input listener events
+                setupEventListeners();
+                
+                // Send initial client settings
+                applyStreamSettings();
+                
+                // Keep-alive/latency ping loop
+                pingInterval = setInterval(() => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        pingStartTime = performance.now();
+                        // Send lightweight ping (e.g. empty key event or client setting)
+                        ws.send(JSON.stringify({ type: "ping" }));
+                    }
+                }, 2000);
+            };
+
+            ws.onmessage = function(event) {
+                if (typeof event.data === "string") {
+                    // JSON Control/Initialization message
+                    try {
+                        const msg = JSON.parse(event.data);
+                        if (msg.type === "init") {
+                            screenWidth = msg.screen_width;
+                            screenHeight = msg.screen_height;
+                            
+                            // Adjust Canvas scaling ratios
+                            canvas.width = screenWidth;
+                            canvas.height = screenHeight;
+                            console.log(`Resolution updated from Host: ${screenWidth}x${screenHeight}`);
+                            
+                            // Update status indicator mode display
+                            const modeText = msg.mode === "reverse" ? "Office PC (Reverse)" : "Local PC (Direct)";
+                            document.getElementById('status-text').innerText = `Connected to ${modeText}`;
+                            
+                            // Initialize Audio Player based on host output sample settings
+                            if (msg.audio) {
+                                pcmPlayer = new AudioPCMStreamPlayer(msg.audio.channels, msg.audio.samplerate);
+                            }
+                        } else if (msg.type === "pong") {
+                            // Calculate roundtrip latency
+                            const latency = Math.round(performance.now() - pingStartTime);
+                            document.getElementById('latency-text').innerText = `${latency}ms`;
+                        }
+                    } catch(e) {
+                        console.error("Error parsing string message:", e);
+                    }
+                } else if (event.data instanceof ArrayBuffer) {
+                    // Binary payload: [Type byte] + [Data]
+                    const view = new DataView(event.data);
+                    const msgType = view.getUint8(0);
+                    const binaryData = event.data.slice(1);
+                    
+                    if (msgType === 1) {
+                        // Type 1: Screen Frame (JPEG Image bytes)
+                        const blob = new Blob([binaryData], { type: 'image/jpeg' });
+                        const img = new Image();
+                        img.src = URL.createObjectURL(blob);
+                        img.onload = function() {
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            URL.revokeObjectURL(img.src);
+                        };
+                    } else if (msgType === 2) {
+                        // Type 2: Audio Chunk (Int16 PCM bytes)
+                        if (pcmPlayer && document.getElementById('setting-audio').checked) {
+                            pcmPlayer.play(binaryData);
+                        }
+                    }
+                }
+            };
+
+            ws.onerror = function(err) {
+                console.error("WebSocket Error:", err);
+                showError("Connection failed. Check target IP/Port/Passcode.");
+                disconnectRemote();
+            };
+
+            ws.onclose = function(event) {
+                console.log("WebSocket connection closed:", event);
+                if (event.code === 4001) {
+                    showError("Access Denied: Invalid Security Passcode!");
+                } else {
+                    showError("Connection lost or closed.");
+                }
+                disconnectRemote();
+            };
+        }
+
+        // Disconnect Remote
+        function disconnectRemote() {
+            isConnected = false;
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+            if (pcmPlayer) {
+                pcmPlayer.close();
+                pcmPlayer = null;
+            }
+            if (pingInterval) {
+                clearInterval(pingInterval);
+                pingInterval = null;
+            }
+
+            // Restore UI panels
+            document.getElementById('landing-panel').style.display = 'flex';
+            document.getElementById('viewer-panel').style.display = 'none';
+            document.getElementById('btn-connect').disabled = false;
+            document.getElementById('connect-spinner').style.display = 'none';
+            document.getElementById('status-dot').className = "indicator-dot";
+            document.getElementById('status-text').innerText = "Disconnected";
+            document.getElementById('latency-text').innerText = "--ms";
+        }
+
+        // Apply stream settings to backend server
+        function applyStreamSettings() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            
+            const quality = parseInt(document.getElementById('setting-quality').value);
+            const scale = parseFloat(document.getElementById('setting-scale').value);
+            const fps = parseInt(document.getElementById('setting-fps').value);
+            const audioEnabled = document.getElementById('setting-audio').checked;
+            
+            const settingsMsg = {
+                type: "settings",
+                quality: quality,
+                scale: scale,
+                fps: fps,
+                audio_enabled: audioEnabled
+            };
+            ws.send(JSON.stringify(settingsMsg));
+        }
+
+        // Send Key Events / Mouse Inputs
+        function sendEvent(eventObj) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(eventObj));
+            }
+        }
+
+        // Event Listeners for Interaction Inputs
+        function setupEventListeners() {
+            // Disable default right-click context menu on canvas
+            canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+            // --- Mouse movement ---
+            canvas.addEventListener('mousemove', function(e) {
+                if (!isConnected) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const y = (e.clientY - rect.top) / rect.height;
+                
+                sendEvent({
+                    type: "mouse_move",
+                    x: x,
+                    y: y
+                });
+            });
+
+            // --- Mouse Clicks ---
+            function getBtnName(button) {
+                if (button === 0) return "left";
+                if (button === 1) return "middle";
+                if (button === 2) return "right";
+                return "left";
+            }
+
+            canvas.addEventListener('mousedown', function(e) {
+                if (!isConnected) return;
+                e.preventDefault();
+                canvas.focus();
+                sendEvent({
+                    type: "mouse_click",
+                    button: getBtnName(e.button),
+                    action: "down"
+                });
+            });
+
+            canvas.addEventListener('mouseup', function(e) {
+                if (!isConnected) return;
+                e.preventDefault();
+                sendEvent({
+                    type: "mouse_click",
+                    button: getBtnName(e.button),
+                    action: "up"
+                });
+            });
+
+            canvas.addEventListener('dblclick', function(e) {
+                if (!isConnected) return;
+                e.preventDefault();
+                sendEvent({
+                    type: "mouse_click",
+                    button: getBtnName(e.button),
+                    action: "double"
+                });
+            });
+
+            // --- Mouse Wheel Scroll ---
+            canvas.addEventListener('wheel', function(e) {
+                if (!isConnected) return;
+                e.preventDefault();
+                
+                // Scale ticks down so it scrolls cleanly
+                const scrollSpeed = 30; 
+                const dy = e.deltaY > 0 ? -scrollSpeed : scrollSpeed;
+                const dx = e.deltaX > 0 ? -scrollSpeed : scrollSpeed;
+                
+                sendEvent({
+                    type: "mouse_scroll",
+                    dx: dx,
+                    dy: dy
+                });
+            }, { passive: false });
+
+            // Make canvas focusable to capture keys
+            canvas.setAttribute('tabindex', '0');
+            canvas.style.outline = 'none';
+
+            // --- Keyboard capturing ---
+            canvas.addEventListener('keydown', function(e) {
+                if (!isConnected) return;
+                e.preventDefault(); // Prevent browser defaults (e.g. F5, Backspace, arrows)
+                
+                sendEvent({
+                    type: "key_event",
+                    key: e.key,
+                    code: e.code,
+                    action: "down"
+                });
+            });
+
+            canvas.addEventListener('keyup', function(e) {
+                if (!isConnected) return;
+                e.preventDefault();
+                
+                sendEvent({
+                    type: "key_event",
+                    key: e.key,
+                    code: e.code,
+                    action: "up"
+                });
+            });
+        }
+
+        // Quick Command Keys
+        function sendQuickKey(action) {
+            if (!isConnected) return;
+            
+            if (action === "ctrl-alt-del") {
+                // Emulate sequence
+                sendEvent({ type: "key_event", key: "Control", code: "ControlLeft", action: "down" });
+                sendEvent({ type: "key_event", key: "Alt", code: "AltLeft", action: "down" });
+                sendEvent({ type: "key_event", key: "Delete", code: "Delete", action: "down" });
+                
+                setTimeout(() => {
+                    sendEvent({ type: "key_event", key: "Delete", code: "Delete", action: "up" });
+                    sendEvent({ type: "key_event", key: "Alt", code: "AltLeft", action: "up" });
+                    sendEvent({ type: "key_event", key: "Control", code: "ControlLeft", action: "up" });
+                }, 100);
+            } else if (action === "alt-tab") {
+                sendEvent({ type: "key_event", key: "Alt", code: "AltLeft", action: "down" });
+                sendEvent({ type: "key_event", key: "Tab", code: "Tab", action: "down" });
+                setTimeout(() => {
+                    sendEvent({ type: "key_event", key: "Tab", code: "Tab", action: "up" });
+                    sendEvent({ type: "key_event", key: "Alt", code: "AltLeft", action: "up" });
+                }, 100);
+            } else if (action === "win") {
+                sendEvent({ type: "key_event", key: "Meta", code: "MetaLeft", action: "down" });
+                setTimeout(() => {
+                    sendEvent({ type: "key_event", key: "Meta", code: "MetaLeft", action: "up" });
+                }, 100);
+            } else if (action === "win-d") {
+                sendEvent({ type: "key_event", key: "Meta", code: "MetaLeft", action: "down" });
+                sendEvent({ type: "key_event", key: "d", code: "KeyD", action: "down" });
+                setTimeout(() => {
+                    sendEvent({ type: "key_event", key: "d", code: "KeyD", action: "up" });
+                    sendEvent({ type: "key_event", key: "Meta", code: "MetaLeft", action: "up" });
+                }, 100);
+            } else if (action === "esc") {
+                sendEvent({ type: "key_event", key: "Escape", code: "Escape", action: "down" });
+                setTimeout(() => {
+                    sendEvent({ type: "key_event", key: "Escape", code: "Escape", action: "up" });
+                }, 100);
+            }
+        }
+
+        // Fullscreen Mode Handler
+        function toggleFullscreen() {
+            const container = document.getElementById('canvas-container');
+            if (!document.fullscreenElement) {
+                container.requestFullscreen().catch(err => {
+                    showError(`Error enabling fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>

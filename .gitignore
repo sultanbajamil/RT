@@ -1,0 +1,9 @@
+﻿build/
+dist/
+__pycache__/
+*.py[cod]
+*.exe
+*.log
+.vscode/
+.DS_Store
+Thumbs.db
